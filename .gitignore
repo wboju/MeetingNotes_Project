@@ -17,3 +17,6 @@ Thumbs.db
 
 # IDE
 .vscode/
+
+# Credentials
+OAuth client.json
