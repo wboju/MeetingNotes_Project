@@ -1,0 +1,8 @@
+Attendees: Alex, Jamie, Priya
+
+Alex: Let's start with the product update. Jamie, where are we on the new feature?
+Jamie: We finished the backend work yesterday. Frontend should be done by Thursday.
+Priya: I'll need the designs finalized before I can start testing.
+Alex: Ok, Jamie will send the designs to Priya by EOD tomorrow. Priya to start testing by Friday.
+Jamie: Also we need to book the client demo for next week.
+Alex: I'll handle that. Let's aim for Wednesday.
