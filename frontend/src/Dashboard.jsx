@@ -1,7 +1,13 @@
 import MeetingList from "./MeetingList";
 import { useState } from "react";
 
-function Dashboard({ meetings, user, onLogout, onTranscriptUpload }) {
+function Dashboard({
+  meetings,
+  calendarEvents,
+  user,
+  onLogout,
+  onTranscriptUpload,
+}) {
   const [query, setQuery] = useState("");
 
   const filtered = meetings.filter((meeting) => {
@@ -40,12 +46,32 @@ function Dashboard({ meetings, user, onLogout, onTranscriptUpload }) {
           onChange={(e) => setQuery(e.target.value)}
         />
       </header>
-      <main className="dashboard-main">
+
+      {calendarEvents.length > 0 && (
+        <section className="calendar-section">
+          <h2 className="calendar-title">Upcoming Calendar Events</h2>
+          <div className="calendar-list">
+            {calendarEvents.map((event) => (
+              <div key={event.id} className="calendar-card">
+                <span className="calendar-event-title">{event.summary}</span>
+                <span className="calendar-event-time">
+                  {event.start.dateTime
+                    ? new Date(event.start.dateTime).toLocaleString()
+                    : event.start.date}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="meetings-section">
+        <h2 className="section-title">Meeting Notes</h2>
         <MeetingList
           meetings={filtered}
           onTranscriptUpload={onTranscriptUpload}
         />
-      </main>
+      </section>
     </div>
   );
 }

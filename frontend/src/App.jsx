@@ -9,7 +9,13 @@ function App() {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
   });
+
+  const [accessToken, setAccessToken] = useState(() => {
+    return localStorage.getItem("accessToken") || null;
+  });
+
   const [meetings, setMeetings] = useState([]);
+  const [calendarEvents, setCalendarEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -30,19 +36,53 @@ function App() {
       });
   }, [user]);
 
-  const handleLogin = (credentialResponse) => {
-    const decoded = JSON.parse(
-      atob(credentialResponse.credential.split(".")[1]),
-    );
-    setUser(decoded);
-    localStorage.setItem("user", JSON.stringify(decoded));
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const now = new Date().toISOString();
+    const oneWeekLater = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${now}&timeMax=${oneWeekLater}&singleEvents=true&orderBy=startTime`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Calendar data:", data);
+        setCalendarEvents(data.items || []);
+      })
+      .catch((err) => console.error("Calendar fetch error:", err));
+  }, [accessToken]);
+
+  const handleLogin = async (tokenResponse) => {
+    const token = tokenResponse.access_token;
+    setAccessToken(token);
+    localStorage.setItem("accessToken", token);
+
+    const userInfo = await fetch(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    ).then((res) => res.json());
+
+    setUser(userInfo);
+    localStorage.setItem("user", JSON.stringify(userInfo));
   };
 
   const handleLogout = () => {
     setUser(null);
     setMeetings([]);
+    setCalendarEvents([]);
     setLoading(true);
     localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
   };
 
   const handleTranscriptUpload = (id, data) => {
@@ -67,6 +107,7 @@ function App() {
   return (
     <Dashboard
       meetings={meetings}
+      calendarEvents={calendarEvents}
       user={user}
       onLogout={handleLogout}
       onTranscriptUpload={handleTranscriptUpload}
